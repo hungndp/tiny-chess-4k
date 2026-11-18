@@ -20,7 +20,7 @@ plays).
 Perft-verified on the standard suite (startpos, kiwipete, en-passant
 pin, promotion, position 5). On the make.fun kit trial protocol it
 scores ≈ 1545 Elo, and beat the previous version of this engine
-23 wins – 1 loss – 13 draws in a 37-game head-to-head.
+25 wins – 1 loss – 14 draws in a 40-game head-to-head (≈ +241 Elo).
 
 ## Run
 
