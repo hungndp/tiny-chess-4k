@@ -7,13 +7,21 @@ VT=[0,100,300,320,500,950,0]
 KN=[-33,-31,-18,-14,14,18,31,33];K8=[-17,-16,-15,-1,1,15,16,17]
 BD=[-17,-15,15,17];RD=[-16,-1,1,16];QD=BD+RD
 PA=[0,0,3,8,18,36,60]
+PS=[0,5,12,25,45,80,120]
 CE=[0,1,2,3,3,2,1,0];CN=[CE[s&7]+CE[s>>4]if not s&0x88 else 0 for s in range(128)]
 CAST=[(1,116,118,119,(117,118),(116,117,118),0),(2,116,114,112,(113,114,115),(116,115,114),0),(4,4,6,7,(5,6),(4,5,6),1),(8,4,2,0,(1,2,3),(4,3,2),1)]
 _R=random.Random(20261117)
 Z=[[_R.getrandbits(64)for _ in range(128)]for _ in range(15)]
 ZS=_R.getrandbits(64);ZC=[_R.getrandbits(64)for _ in range(16)];ZE=[_R.getrandbits(64)for _ in range(128)]
-B=[0]*128;SD=0;CS=0;EP=-1;HF=0;HK=0;KG=[116,4];MNP=[0,0];OCC=set()
+B=[0]*128;SD=0;CS=0;EP=-1;HF=0;HK=0;KG=[116,4];MNP=[0,0];PL=[set(),set()]
 ST=[];TT={};ND=[0];LIM=[60000]
+KL=[[0,0]for _ in range(128)];HH={}
+SC=[0];PH=[0];BC=[0,0]
+def pv(p,sq):
+ t7=p&7
+ if t7==1:r=sq>>4;return 100+PA[6-r]if p<8 else 100+PA[r-1]
+ if t7==2:return 300+(CN[sq]-2)*6+(4 if (sq>>4<4)!=(p>8) else 0)
+ return VT[t7]
 class TO(Exception):pass
 def at(s,by):
  pc=8*by;b=B
@@ -42,16 +50,17 @@ def gn(cap_only=0):
   if (t>>4)==(0 if us==0 else 7):
    for pr in(5,4,3,2):ms.append(s|(t<<7)|(pr<<14))
   else:ms.append(s|(t<<7))
- for s in OCC:
+ for s in PL[us]:
   p=b[s]
-  if (p>8)==en:continue
   t7=p&7;r=s>>4
   if t7==1:
    d=-16 if us==0 else 16;home=6 if us==0 else 1
    t=s+d
-   if not cap_only and not b[t]:
-    add(s,t)
-    if r==home and not b[t+d]:ms.append(s|((t+d)<<7))
+   if not b[t]:
+    if not cap_only:
+     add(s,t)
+     if r==home and not b[t+d]:ms.append(s|((t+d)<<7))
+    elif (t>>4)==(0 if us==0 else 7):add(s,t)
    for dd in(d-1,d+1):
     t=s+dd
     if t&0x88:continue
@@ -88,15 +97,24 @@ def mk(m):
  HK^=ZC[CS]
  if EP>=0:HK^=ZE[EP]
  HK^=Z[p][f]
+ sg=1 if us==0 else -1
  if cap:
-  csq=epc if epc>=0 else t;HK^=Z[cap][csq];B[csq]=0;OCC.discard(csq)
-  if (cap&7)>1:MNP[1-us]-=1
+  csq=epc if epc>=0 else t;HK^=Z[cap][csq];B[csq]=0;PL[1-us].discard(csq);SC[0]+=sg*(pv(cap,csq)if (cap&7)<3 else VT[cap&7])
+  if (cap&7)>1:
+   MNP[1-us]-=1;PH[0]-=VT[cap&7]
+   if (cap&7)==3:BC[1-us]-=1
+ pvf=(p&7)<3 or pr
+ if pvf:SC[0]-=sg*pv(p,f)
  B[t]=(pr|(8*us))if pr else p;B[f]=0;HK^=Z[B[t]][t]
- OCC.discard(f);OCC.add(t)
+ if pvf:SC[0]+=sg*pv(B[t],t)
+ if pr:
+  PH[0]+=VT[pr]
+  if pr==3:BC[us]+=1
+ PL[us].discard(f);PL[us].add(t)
  if (p&7)==6:
   KG[us]=t
-  if t-f==2:B[t-1]=B[t+1];B[t+1]=0;HK^=Z[B[t-1]][t-1]^Z[B[t-1]][t+1];OCC.discard(t+1);OCC.add(t-1)
-  elif f-t==2:B[t+1]=B[t-2];B[t-2]=0;HK^=Z[B[t+1]][t+1]^Z[B[t+1]][t-2];OCC.discard(t-2);OCC.add(t+1)
+  if t-f==2:B[t-1]=B[t+1];B[t+1]=0;HK^=Z[B[t-1]][t-1]^Z[B[t-1]][t+1];PL[us].discard(t+1);PL[us].add(t-1)
+  elif f-t==2:B[t+1]=B[t-2];B[t-2]=0;HK^=Z[B[t+1]][t+1]^Z[B[t+1]][t-2];PL[us].discard(t-2);PL[us].add(t+1)
   CS&=~(3<<(2*us))
  for sq,bit in((119,1),(112,2),(7,4),(0,8)):
   if f==sq or t==sq:CS&=~bit
@@ -110,17 +128,24 @@ def um():
  global SD,CS,EP,HF,HK
  m,cap,CS,EP,HF,HK,epc=ST.pop()
  f=m&127;t=(m>>7)&127;pr=m>>14;us=1-SD;SD=us
- p=B[t]
+ p=B[t];sg=1 if us==0 else -1
+ pvf=(p&7)<3 or pr
+ if pvf:SC[0]-=sg*pv(p,t)
  if pr:
+  PH[0]-=VT[pr]
+  if pr==3:BC[us]-=1
   p=1|(8*us);MNP[us]-=1
- B[f]=p;B[t]=0;OCC.add(f);OCC.discard(t)
+ if pvf:SC[0]+=sg*pv(p,f)
+ B[f]=p;B[t]=0;PL[us].add(f);PL[us].discard(t)
  if cap:
-  csq=epc if epc>=0 else t;B[csq]=cap;OCC.add(csq)
-  if (cap&7)>1:MNP[1-us]+=1
+  csq=epc if epc>=0 else t;B[csq]=cap;PL[1-us].add(csq);SC[0]-=sg*(pv(cap,csq)if (cap&7)<3 else VT[cap&7])
+  if (cap&7)>1:
+   MNP[1-us]+=1;PH[0]+=VT[cap&7]
+   if (cap&7)==3:BC[1-us]+=1
  if (p&7)==6:
   KG[us]=f
-  if t-f==2:B[t+1]=B[t-1];B[t-1]=0;OCC.add(t+1);OCC.discard(t-1)
-  elif f-t==2:B[t-2]=B[t+1];B[t+1]=0;OCC.add(t-2);OCC.discard(t+1)
+  if t-f==2:B[t+1]=B[t-1];B[t-1]=0;PL[us].add(t+1);PL[us].discard(t-1)
+  elif f-t==2:B[t-2]=B[t+1];B[t+1]=0;PL[us].add(t-2);PL[us].discard(t+1)
 def mn():
  global SD,EP,HF,HK
  ST.append((-1,0,CS,EP,HF,HK,-1))
@@ -130,34 +155,43 @@ def mn():
 def un():
  global SD,CS,EP,HF,HK
  _m,_c,CS,EP,HF,HK,_e=ST.pop();SD=1-SD
+def psc(ow,en):
+ s=0
+ for f in range(8):
+  w=ow[f]
+  if not w:continue
+  c=w.bit_count()
+  if c>1:s-=12*(c-1)
+  if not((f>0 and ow[f-1])or(f<7 and ow[f+1])):s-=8*c
+  x=w
+  while x:
+   lb=x&-x;u=lb.bit_length()-1;x^=lb;ah=(255<<(u+1))&255
+   if not((en[f]&ah)or(f>0 and en[f-1]&ah)or(f<7 and en[f+1]&ah)):s+=PS[u-1]
+ return s
 def ev():
- s=0;ph=0;nb0=nb1=0
- for sq in OCC:
-  p=B[sq];t7=p&7
-  if t7==6:continue
-  if t7==1:
-   v=100+PA[(6-(sq>>4))if p<8 else((sq>>4)-1)]
-  else:
-   v=VT[t7];ph+=v
-   if t7==2:v+=(CN[sq]-2)*5
-   elif t7==3:
-    if p<8:nb0+=1
-    else:nb1+=1
-  s+=v if p<8 else -v
- if nb0>=2:s+=15
- if nb1>=2:s-=15
- eg=1-min(1.0,ph/2600)
+ pm0=[0]*8;pm1=[0]*8;qm0=[0]*8;qm1=[0]*8
+ for sq in PL[0]:
+  if (B[sq]&7)==1:r=sq>>4;pm0[sq&7]|=1<<r;qm0[sq&7]|=1<<(7-r)
+ for sq in PL[1]:
+  if (B[sq]&7)==1:r=sq>>4;pm1[sq&7]|=1<<r;qm1[sq&7]|=1<<(7-r)
+ s=SC[0]+psc(qm0,qm1)-psc(pm1,pm0)
+ if BC[0]>=2:s+=15
+ if BC[1]>=2:s-=15
+ eg=1-min(1.0,PH[0]/2600)
  for w in(0,1):
   cen=CN[KG[w]]
   v=int((8-cen*5)*(1-eg)+(cen*6-6)*eg)
   s+=v if w==0 else -v
  return s if SD==0 else -s
-def od(ms,ttm):
- b=B
+def od(ms,ttm,ply=0):
+ b=B;kl=KL[ply]
  def sc(m):
   if m==ttm:return 1<<28
   cap=b[(m>>7)&127]
-  return(1<<24)+VT[cap&7]*16-VT[b[m&127]&7]if cap else 0
+  if cap:return(1<<24)+VT[cap&7]*16-VT[b[m&127]&7]
+  if m==kl[0]:return 1<<23
+  if m==kl[1]:return(1<<23)-1
+  return HH.get((SD<<14)|(m&16383),0)
  ms.sort(key=sc,reverse=True)
  return ms
 def qs(a,b,ply):
@@ -172,9 +206,15 @@ def qs(a,b,ply):
   ms=gn(1)
  else:ms=gn()
  best=-30000;leg=0
- for m in od(ms,0):
+ for m in od(ms,0,ply):
+  f=m&127;t=(m>>7)&127
+  if not chk:
+   cap=B[t]
+   if cap and not m>>14 and st+VT[cap&7]+180<a:continue
+  k=KG[SD];p7=B[f]&7
+  need=chk or p7==6 or(p7==1 and t==EP)or(f&7)==(k&7)or(f>>4)==(k>>4)or abs((f&7)-(k&7))==abs((f>>4)-(k>>4))
   mk(m)
-  if at(KG[1-SD],SD):um();continue
+  if need and at(KG[1-SD],SD):um();continue
   leg=1;s=-qs(-b,-a,ply+1);um()
   if s>best:best=s
   if s>a:a=s
@@ -182,11 +222,13 @@ def qs(a,b,ply):
  if not leg:return -29000+ply if chk else a
  return best if chk else a
 def se(d,a,b,ply):
+ if ply>0:
+  if HF>=100:return 0
  if d==0:return qs(a,b,ply)
  ND[0]+=1
  if (ND[0]&511)==0 and ND[0]>LIM[0]:raise TO()
- if ply>0 and HF>=100:return 0
  chk=at(KG[SD],1-SD)
+ if chk:d+=1
  a0,b0=a,b
  ent=TT.get(HK);ttm=0
  if ent:
@@ -201,17 +243,30 @@ def se(d,a,b,ply):
   s=-se(d-3,-b,-b+1,ply+1)
   un()
   if s>=b:return b
- ms=od(gn(),ttm)
+ ms=od(gn(),ttm,ply)
  best=-30000;bm=0;leg=0
  for m in ms:
+  f=m&127;t=(m>>7)&127;cap=B[t];pr=m>>14
+  k=KG[SD];p7=B[f]&7
+  need=chk or p7==6 or(p7==1 and t==EP)or(f&7)==(k&7)or(f>>4)==(k>>4)or abs((f&7)-(k&7))==abs((f>>4)-(k>>4))
   mk(m)
-  if at(KG[1-SD],SD):um();continue
+  if need and at(KG[1-SD],SD):um();continue
   leg+=1
-  s=-se(d-1,-b,-a,ply+1)
+  red=1 if(d>=3 and leg>3 and not chk and not cap and not pr)else 0
+  if leg==1:s=-se(d-1,-b,-a,ply+1)
+  else:
+   s=-se(d-1-red,-a-1,-a,ply+1)
+   if red and s>a:s=-se(d-1,-a-1,-a,ply+1)
+   if s>a and s<b:s=-se(d-1,-b,-a,ply+1)
   um()
   if s>best:best=s;bm=m
   if s>a:a=s
-  if a>=b:break
+  if a>=b:
+   if not cap and not pr:
+    k2=KL[ply]
+    if k2[0]!=m:k2[1]=k2[0];k2[0]=m
+    kk=(SD<<14)|(m&16383);HH[kk]=min(HH.get(kk,0)+d*d,1<<22)
+   break
  if not leg:return -29000+ply if chk else 0
  TT[HK]=(d,best,2 if best<=a0 else(1 if best>=b0 else 0),bm)
  return best
@@ -234,13 +289,20 @@ def pf(fen):
  EP=-1
  if len(parts)>3 and parts[3]!="-":EP=(8-int(parts[3][1]))*16+(ord(parts[3][0])-97)
  HF=int(parts[4])if len(parts)>4 else 0
- OCC.clear();OCC.update(sq for sq in range(128)if B[sq])
- MNP[0]=MNP[1]=0
- for sq in OCC:
-  p=B[sq];t7=p&7
-  if t7!=1 and t7!=6:MNP[0 if p<8 else 1]+=1
+ PL[0].clear();PL[1].clear()
+ MNP[0]=MNP[1]=0;SC[0]=0;PH[0]=0;BC[0]=BC[1]=0
+ for sq in range(128):
+  p=B[sq]
+  if not p:continue
+  PL[0 if p<8 else 1].add(sq)
+  t7=p&7
+  SC[0]+=pv(p,sq)if p<8 else -pv(p,sq)
+  if t7!=1 and t7!=6:
+   MNP[0 if p<8 else 1]+=1;PH[0]+=VT[t7]
+   if t7==3:BC[0 if p<8 else 1]+=1
  HK=0
- for sq in OCC:HK^=Z[B[sq]][sq]
+ for sq in PL[0]:HK^=Z[B[sq]][sq]
+ for sq in PL[1]:HK^=Z[B[sq]][sq]
  if SD:HK^=ZS
  HK^=ZC[CS]
  if EP>=0:HK^=ZE[EP]
@@ -251,23 +313,25 @@ def uci(m):
  return u
 def rt(fen,plies):
  pf(fen)
- ST.clear();TT.clear()
- LIM[0]=95000 if plies<130 else 35000
+ ST.clear()
+ if len(TT)>300000:TT.clear()
+ LIM[0]=85000 if plies<130 else 35000
  ND[0]=0
- ms=od(gn(),0)
+ ent=TT.get(HK)
+ ms=od(gn(),ent[3]if ent else 0)
  best=ms[0];bv=-30001
  d=1
  while d<40:
   try:
-   a=-30000;cb=best
+   a=-30000;cb=best;res=[]
    for m in ms:
     mk(m)
     if at(KG[1-SD],SD):um();continue
     s=-se(d-1,-30000,-a,1)
-    um()
+    um();res.append((s,m))
     if s>a:a=s;cb=m
    bv=a;best=cb
-   ms.sort(key=lambda m:m!=best)
+   res.sort(key=lambda x:-x[0]);ms=[m for s,m in res]
    if bv>27000 or bv<-27000:break
   except TO:break
   d+=1
