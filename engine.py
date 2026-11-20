@@ -1,28 +1,29 @@
 import json,os,sys,random,urllib.request as rq
-U=os.environ.get("MAKEFUN_ENV_URL")or sys.exit("MAKEFUN_ENV_URL is not set")
+U=os.environ.get("MAKEFUN_ENV_URL")or sys.exit(9)
 def post(p,b):
- r=rq.Request(U+p,data=json.dumps(b).encode(),headers={"content-type":"application/json"})
+ r=rq.Request(U+p,data=json.dumps(b).encode())
  with rq.urlopen(r)as f:return json.load(f)
-VT=[0,100,300,320,500,950,0]
 KN=[-33,-31,-18,-14,14,18,31,33];K8=[-17,-16,-15,-1,1,15,16,17]
 BD=[-17,-15,15,17];RD=[-16,-1,1,16];QD=BD+RD
-PA=[0,0,3,8,18,36,60]
-PS=[0,5,12,25,45,80,120]
-CE=[0,1,2,3,3,2,1,0];CN=[CE[s&7]+CE[s>>4]if not s&0x88 else 0 for s in range(128)]
+PW=[0,0,1,1,2,4,0]
+S="EEEEEEEEQVMQMUICDFHIMLHCCGFGHGGBAEEGGFFBBEEDEEICAECBCHJBEEEEEEEEEEEEEEEE[[YVWUY]QQOMLKOOIHGEEEGGGFEDDDEEEFDEEEEDGFFFGEEDEEEEEEEE0:A?M9C7<@NIHMFC?MIMOUNKDGGKIMGHCEGGIGGDBDGFGGHCA?CEEGCC8C>ACACB>@CAAA=9BDBEDBB?BCFFEDC@CEHHHGFCCDGHGGECBEEGFECB@CDEECB?A?BCBC?=AE;AB@FDBGCCIMG?CIKJIKIEEEGKIIFEDGGHIGFEEGGGGIGFEGGEFGIEAECCCC@CCCCDDDCBDEFCECECEDEEEFEEEFGFGFEEDEGGFFEDCEFFGEDCCCDEEDCABDBEDCECIJIKMFIKIILMOMHKEGHIGKMGBCFHHIDCABCEFDFB?BCCEEEA?CCDEGD<CCEGGFABGFGGGGFEGGGGEEFEFFFEEEEEEEEEGEEEEEFFFFFEEEEEGEFEEEFFEFFEEEEEFGGEAEIGMKKKB@EECLILCCFFILKLAACCEGEEDBDDEEEECECEEEGEADGEFGEEECDFCBA?DHHIIGFGCGIJLHIECFFKKIGFEHHKLJLICIGKIIJHCAGFFGFEBBACCBAAAAB?EAC@=HGC>AEGIECDDE@ADHECCFHBCCCAABCA?EA@??A?CCB??ACAEFD=?CFFCIGABCA><ACCCGECCGGGGJHGFGHGGKKGDHHIHIHECEGHIHFCCEGGHGFDACEGGEEC?ACCACB?"
+VM=[0,82,337,365,477,1025,0];VE=[0,94,281,297,512,936,0]
+MG=[0]*1920;EG=[0]*1920
+for _i,_c in enumerate(S):
+ _v=(ord(_c)-69)*8;_t=_i//128+1;_j=_i%128;_g=_j//64;_r=(_j%64)//8;_f=_j%8;_b=(VM,VE)[_g][_t]+_v;_a=(MG,EG)[_g]
+ _a[_t*128+_r*16+_f]=_b;_a[(_t+8)*128+(7-_r)*16+_f]=-_b
 CAST=[(1,116,118,119,(117,118),(116,117,118),0),(2,116,114,112,(113,114,115),(116,115,114),0),(4,4,6,7,(5,6),(4,5,6),1),(8,4,2,0,(1,2,3),(4,3,2),1)]
 _R=random.Random(20261117)
 Z=[[_R.getrandbits(64)for _ in range(128)]for _ in range(15)]
 ZS=_R.getrandbits(64);ZC=[_R.getrandbits(64)for _ in range(16)];ZE=[_R.getrandbits(64)for _ in range(128)]
 B=[0]*128;SD=0;CS=0;EP=-1;HF=0;HK=0;KG=[116,4];MNP=[0,0];PL=[set(),set()]
 ST=[];TT={};ND=[0];LIM=[60000]
-KL=[[0,0]for _ in range(128)];HH={}
-SC=[0];PH=[0];BC=[0,0]
-def pv(p,sq):
- t7=p&7
- if t7==1:r=sq>>4;return 100+PA[6-r]if p<8 else 100+PA[r-1]
- if t7==2:return 300+(CN[sq]-2)*6+(4 if (sq>>4<4)!=(p>8) else 0)
- return VT[t7]
+KL=[[0,0]for _ in range(128)]
+SM=[0];SE=[0];PH=[0]
 class TO(Exception):pass
+def inc():
+ ND[0]+=1
+ if (ND[0]&511)==0 and ND[0]>LIM[0]:raise TO()
 def at(s,by):
  pc=8*by;b=B
  for d in((15,17)if by==0 else(-15,-17)):
@@ -97,24 +98,20 @@ def mk(m):
  HK^=ZC[CS]
  if EP>=0:HK^=ZE[EP]
  HK^=Z[p][f]
- sg=1 if us==0 else -1
  if cap:
-  csq=epc if epc>=0 else t;HK^=Z[cap][csq];B[csq]=0;PL[1-us].discard(csq);SC[0]+=sg*(pv(cap,csq)if (cap&7)<3 else VT[cap&7])
+  csq=epc if epc>=0 else t;HK^=Z[cap][csq];B[csq]=0;PL[1-us].discard(csq);i=cap*128+csq;SM[0]-=MG[i];SE[0]-=EG[i]
   if (cap&7)>1:
-   MNP[1-us]-=1;PH[0]-=VT[cap&7]
-   if (cap&7)==3:BC[1-us]-=1
- pvf=(p&7)<3 or pr
- if pvf:SC[0]-=sg*pv(p,f)
+   MNP[1-us]-=1;PH[0]-=PW[cap&7]
+ i=p*128+f;SM[0]-=MG[i];SE[0]-=EG[i]
  B[t]=(pr|(8*us))if pr else p;B[f]=0;HK^=Z[B[t]][t]
- if pvf:SC[0]+=sg*pv(B[t],t)
+ i=B[t]*128+t;SM[0]+=MG[i];SE[0]+=EG[i]
  if pr:
-  PH[0]+=VT[pr]
-  if pr==3:BC[us]+=1
+  PH[0]+=PW[pr]
  PL[us].discard(f);PL[us].add(t)
  if (p&7)==6:
   KG[us]=t
-  if t-f==2:B[t-1]=B[t+1];B[t+1]=0;HK^=Z[B[t-1]][t-1]^Z[B[t-1]][t+1];PL[us].discard(t+1);PL[us].add(t-1)
-  elif f-t==2:B[t+1]=B[t-2];B[t-2]=0;HK^=Z[B[t+1]][t+1]^Z[B[t+1]][t-2];PL[us].discard(t-2);PL[us].add(t+1)
+  if t-f==2:B[t-1]=B[t+1];B[t+1]=0;HK^=Z[B[t-1]][t-1]^Z[B[t-1]][t+1];PL[us].discard(t+1);PL[us].add(t-1);r=B[t-1];SM[0]+=MG[r*128+t-1]-MG[r*128+t+1];SE[0]+=EG[r*128+t-1]-EG[r*128+t+1]
+  elif f-t==2:B[t+1]=B[t-2];B[t-2]=0;HK^=Z[B[t+1]][t+1]^Z[B[t+1]][t-2];PL[us].discard(t-2);PL[us].add(t+1);r=B[t+1];SM[0]+=MG[r*128+t+1]-MG[r*128+t-2];SE[0]+=EG[r*128+t+1]-EG[r*128+t-2]
   CS&=~(3<<(2*us))
  for sq,bit in((119,1),(112,2),(7,4),(0,8)):
   if f==sq or t==sq:CS&=~bit
@@ -128,24 +125,21 @@ def um():
  global SD,CS,EP,HF,HK
  m,cap,CS,EP,HF,HK,epc=ST.pop()
  f=m&127;t=(m>>7)&127;pr=m>>14;us=1-SD;SD=us
- p=B[t];sg=1 if us==0 else -1
- pvf=(p&7)<3 or pr
- if pvf:SC[0]-=sg*pv(p,t)
+ p=B[t]
+ i=p*128+t;SM[0]-=MG[i];SE[0]-=EG[i]
  if pr:
-  PH[0]-=VT[pr]
-  if pr==3:BC[us]-=1
+  PH[0]-=PW[pr]
   p=1|(8*us);MNP[us]-=1
- if pvf:SC[0]+=sg*pv(p,f)
+ i=p*128+f;SM[0]+=MG[i];SE[0]+=EG[i]
  B[f]=p;B[t]=0;PL[us].add(f);PL[us].discard(t)
  if cap:
-  csq=epc if epc>=0 else t;B[csq]=cap;PL[1-us].add(csq);SC[0]-=sg*(pv(cap,csq)if (cap&7)<3 else VT[cap&7])
+  csq=epc if epc>=0 else t;B[csq]=cap;PL[1-us].add(csq);i=cap*128+csq;SM[0]+=MG[i];SE[0]+=EG[i]
   if (cap&7)>1:
-   MNP[1-us]+=1;PH[0]+=VT[cap&7]
-   if (cap&7)==3:BC[1-us]+=1
+   MNP[1-us]+=1;PH[0]+=PW[cap&7]
  if (p&7)==6:
   KG[us]=f
-  if t-f==2:B[t+1]=B[t-1];B[t-1]=0;PL[us].add(t+1);PL[us].discard(t-1)
-  elif f-t==2:B[t-2]=B[t+1];B[t+1]=0;PL[us].add(t-2);PL[us].discard(t+1)
+  if t-f==2:B[t+1]=B[t-1];B[t-1]=0;PL[us].add(t+1);PL[us].discard(t-1);r=B[t+1];SM[0]+=MG[r*128+t+1]-MG[r*128+t-1];SE[0]+=EG[r*128+t+1]-EG[r*128+t-1]
+  elif f-t==2:B[t-2]=B[t+1];B[t+1]=0;PL[us].add(t-2);PL[us].discard(t+1);r=B[t-2];SM[0]+=MG[r*128+t-2]-MG[r*128+t+1];SE[0]+=EG[r*128+t-2]-EG[r*128+t+1]
 def mn():
  global SD,EP,HF,HK
  ST.append((-1,0,CS,EP,HF,HK,-1))
@@ -155,48 +149,22 @@ def mn():
 def un():
  global SD,CS,EP,HF,HK
  _m,_c,CS,EP,HF,HK,_e=ST.pop();SD=1-SD
-def psc(ow,en):
- s=0
- for f in range(8):
-  w=ow[f]
-  if not w:continue
-  c=w.bit_count()
-  if c>1:s-=12*(c-1)
-  if not((f>0 and ow[f-1])or(f<7 and ow[f+1])):s-=8*c
-  x=w
-  while x:
-   lb=x&-x;u=lb.bit_length()-1;x^=lb;ah=(255<<(u+1))&255
-   if not((en[f]&ah)or(f>0 and en[f-1]&ah)or(f<7 and en[f+1]&ah)):s+=PS[u-1]
- return s
 def ev():
- pm0=[0]*8;pm1=[0]*8;qm0=[0]*8;qm1=[0]*8
- for sq in PL[0]:
-  if (B[sq]&7)==1:r=sq>>4;pm0[sq&7]|=1<<r;qm0[sq&7]|=1<<(7-r)
- for sq in PL[1]:
-  if (B[sq]&7)==1:r=sq>>4;pm1[sq&7]|=1<<r;qm1[sq&7]|=1<<(7-r)
- s=SC[0]+psc(qm0,qm1)-psc(pm1,pm0)
- if BC[0]>=2:s+=15
- if BC[1]>=2:s-=15
- eg=1-min(1.0,PH[0]/2600)
- for w in(0,1):
-  cen=CN[KG[w]]
-  v=int((8-cen*5)*(1-eg)+(cen*6-6)*eg)
-  s+=v if w==0 else -v
+ s=(SM[0]*PH[0]+SE[0]*(24-PH[0]))//24
  return s if SD==0 else -s
 def od(ms,ttm,ply=0):
  b=B;kl=KL[ply]
  def sc(m):
   if m==ttm:return 1<<28
   cap=b[(m>>7)&127]
-  if cap:return(1<<24)+VT[cap&7]*16-VT[b[m&127]&7]
+  if cap:return(1<<24)+VM[cap&7]*16-VM[b[m&127]&7]
   if m==kl[0]:return 1<<23
   if m==kl[1]:return(1<<23)-1
-  return HH.get((SD<<14)|(m&16383),0)
+  return 0
  ms.sort(key=sc,reverse=True)
  return ms
 def qs(a,b,ply):
- ND[0]+=1
- if (ND[0]&511)==0 and ND[0]>LIM[0]:raise TO()
+ inc()
  if ply>28:return ev()
  chk=at(KG[SD],1-SD)
  if not chk:
@@ -210,7 +178,7 @@ def qs(a,b,ply):
   f=m&127;t=(m>>7)&127
   if not chk:
    cap=B[t]
-   if cap and not m>>14 and st+VT[cap&7]+180<a:continue
+   if cap and not m>>14 and st+VM[cap&7]+180<a:continue
   k=KG[SD];p7=B[f]&7
   need=chk or p7==6 or(p7==1 and t==EP)or(f&7)==(k&7)or(f>>4)==(k>>4)or abs((f&7)-(k&7))==abs((f>>4)-(k>>4))
   mk(m)
@@ -222,11 +190,9 @@ def qs(a,b,ply):
  if not leg:return -29000+ply if chk else a
  return best if chk else a
 def se(d,a,b,ply):
- if ply>0:
-  if HF>=100:return 0
+ if ply>0 and HF>=100:return 0
  if d==0:return qs(a,b,ply)
- ND[0]+=1
- if (ND[0]&511)==0 and ND[0]>LIM[0]:raise TO()
+ inc()
  chk=at(KG[SD],1-SD)
  if chk:d+=1
  a0,b0=a,b
@@ -265,7 +231,6 @@ def se(d,a,b,ply):
    if not cap and not pr:
     k2=KL[ply]
     if k2[0]!=m:k2[1]=k2[0];k2[0]=m
-    kk=(SD<<14)|(m&16383);HH[kk]=min(HH.get(kk,0)+d*d,1<<22)
    break
  if not leg:return -29000+ply if chk else 0
  TT[HK]=(d,best,2 if best<=a0 else(1 if best>=b0 else 0),bm)
@@ -273,14 +238,13 @@ def se(d,a,b,ply):
 def pf(fen):
  global SD,CS,EP,HF,HK
  parts=fen.split()
- for i in range(128):B[i]=0
- mp={"p":1,"n":2,"b":3,"r":4,"q":5,"k":6}
+ B[:]=[0]*128
  r=0;f=0
  for c in parts[0]:
   if c=="/":r+=1;f=0
   elif c.isdigit():f+=int(c)
   else:
-   p=mp[c.lower()]|(0 if c.isupper()else 8);sq=r*16+f;B[sq]=p
+   p="pnbrqk".find(c.lower())+1|(0 if c.isupper()else 8);sq=r*16+f;B[sq]=p
    if p==6:KG[0]=sq
    if p==14:KG[1]=sq
    f+=1
@@ -290,19 +254,17 @@ def pf(fen):
  if len(parts)>3 and parts[3]!="-":EP=(8-int(parts[3][1]))*16+(ord(parts[3][0])-97)
  HF=int(parts[4])if len(parts)>4 else 0
  PL[0].clear();PL[1].clear()
- MNP[0]=MNP[1]=0;SC[0]=0;PH[0]=0;BC[0]=BC[1]=0
+ MNP[0]=MNP[1]=0;SM[0]=0;SE[0]=0;PH[0]=0
  for sq in range(128):
   p=B[sq]
   if not p:continue
   PL[0 if p<8 else 1].add(sq)
   t7=p&7
-  SC[0]+=pv(p,sq)if p<8 else -pv(p,sq)
+  i=p*128+sq;SM[0]+=MG[i];SE[0]+=EG[i]
   if t7!=1 and t7!=6:
-   MNP[0 if p<8 else 1]+=1;PH[0]+=VT[t7]
-   if t7==3:BC[0 if p<8 else 1]+=1
+   MNP[0 if p<8 else 1]+=1;PH[0]+=PW[t7]
  HK=0
- for sq in PL[0]:HK^=Z[B[sq]][sq]
- for sq in PL[1]:HK^=Z[B[sq]][sq]
+ for sq in PL[0]|PL[1]:HK^=Z[B[sq]][sq]
  if SD:HK^=ZS
  HK^=ZC[CS]
  if EP>=0:HK^=ZE[EP]
@@ -336,9 +298,7 @@ def rt(fen,plies):
   except TO:break
   d+=1
  return uci(best)
-def fb(fen,legal):
- pf(fen)
- return min(legal,key=lambda mv:-VT[B[(8-int(mv[3]))*16+(ord(mv[2])-97)]&7])
+def fb(fen,legal):return legal[0]
 def ch(g):
  try:
   mv=rt(g["fen"],g["plies"])
